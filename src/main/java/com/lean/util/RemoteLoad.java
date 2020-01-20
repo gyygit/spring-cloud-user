@@ -13,37 +13,36 @@ import com.google.common.base.Joiner;
 @Component
 public class RemoteLoad {
 
-    @Autowired
-    private RestTemplate rest;
+  @Autowired
+  private RestTemplate rest;
 
-    public <T> T postRestObject(String serviceName, String url, Class<T> clazz, Map<String, Object> pars) {
-        return postRestObjectRetry(serviceName, url, clazz, pars, 0);
-    }
+  public <T> T postRestObject(String serviceName, String url, Class<T> clazz, Map<String, Object> pars) {
+    return postRestObjectRetry(serviceName, url, clazz, pars, 0);
+  }
 
-    private <T> T postRestObjectRetry(String serviceName, String url, Class<T> clazz, Map<String, Object> pars,
-            Integer retryTime) {
-        try {
-            T data = rest.postForObject(Joiner.on("").join("http://", serviceName, url), convertPar(pars), clazz);
-            return data;
-        } catch (Exception e) {
-            // TODO: handle exception
-            if (retryTime < 3) {
-                return postRestObjectRetry(serviceName, url, clazz, pars, retryTime + 1);
-            }
-            e.printStackTrace();
-            return null;
-        }
+  private <T> T postRestObjectRetry(String serviceName, String url, Class<T> clazz, Map<String, Object> pars, Integer retryTime) {
+    try {
+      T data = rest.postForObject(Joiner.on("").join("http://", serviceName, url), convertPar(pars), clazz);
+      return data;
+    } catch (Exception e) {
+      // TODO: handle exception
+      if (retryTime < 3) {
+        return postRestObjectRetry(serviceName, url, clazz, pars, retryTime + 1);
+      }
+      e.printStackTrace();
+      return null;
     }
+  }
 
-    // 把map放到MultiValueMap中 用来传值
-    private MultiValueMap<String, Object> convertPar(Map<String, Object> par) {
-        MultiValueMap<String, Object> result = new LinkedMultiValueMap<String, Object>();
-        if (par == null) {
-            return result;
-        }
-        for (String key : par.keySet()) {
-            result.add(key, par.get(key));
-        }
-        return result;
+  // 把map放到MultiValueMap中 用来传值
+  private MultiValueMap<String, Object> convertPar(Map<String, Object> par) {
+    MultiValueMap<String, Object> result = new LinkedMultiValueMap<String, Object>();
+    if (par == null) {
+      return result;
     }
+    for (String key : par.keySet()) {
+      result.add(key, par.get(key));
+    }
+    return result;
+  }
 }
